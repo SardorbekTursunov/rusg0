@@ -1,0 +1,45 @@
+{
+  "name": "rusgo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "RusGo — Rus tilini oson o'rgan! Uzbek-friendly gamified Russian learning platform",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "generate-curriculum": "tsx scripts/generate-curriculum.ts",
+    "generate-seed": "tsx scripts/generate-seed.ts",
+    "validate:content": "tsx scripts/validate-content.ts && tsx scripts/validate-curriculum.ts"
+  },
+  "dependencies": {
+    "@fontsource-variable/inter": "^5.3.0",
+    "@hookform/resolvers": "^7.0.5",
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.119.0",
+    "clsx": "^2.1.1",
+    "framer-motion": "^14.11.1",
+    "lucide-react": "^1.70.0",
+    "next": "^16.4.5",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-hook-form": "^7.91.0",
+    "tailwind-merge": "^3.7.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@tailwindcss/postcss": "^4.3.5",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "eslint": "^10.14.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.14.0",
+    "tailwindcss": "^4.3.5",
+    "tsx": "^4.23.15",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.72.1"
+  }
+}

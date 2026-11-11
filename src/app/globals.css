@@ -1,0 +1,207 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   RusGo — dizayn tizimi
+   Brend: #58CC02 (asosiy yashil), gaming, do'stona, toza
+   ========================================================================== */
+
+@theme {
+  /* Ranglar */
+  --color-primary: #58cc02;
+  --color-primary-dark: #3e9e00;
+  --color-primary-soft: #e9f9dc;
+  --color-primary-ink: #2f6b00;
+
+  --color-ink: #202124;
+  --color-ink-soft: #5f6368;
+  --color-ink-faint: #9aa0a6;
+
+  --color-surface: #f7f9fc;
+  --color-surface-2: #eef2f8;
+  --color-line: #e3e8f0;
+
+  --color-accent-blue: #1cb0f6;
+  --color-accent-blue-soft: #e3f6fe;
+  --color-accent-yellow: #ffc800;
+  --color-accent-yellow-soft: #fff6d6;
+  --color-error: #ff4b4b;
+  --color-error-soft: #ffecec;
+
+  /* Shrift */
+  --font-sans: "Inter Variable", "Inter", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, sans-serif;
+
+  /* Radius */
+  --radius-card: 1.25rem;
+  --radius-pill: 999px;
+
+  /* Animatsiyalar */
+  --animate-fade-up: fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-pop: pop 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-shimmer: shimmer 1.4s ease-in-out infinite;
+  --animate-bounce-in: bounce-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-flame: flame 1.6s ease-in-out infinite;
+  --animate-progress-stripes: progress-stripes 1s linear infinite;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes pop {
+    0% {
+      transform: scale(0.86);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  @keyframes bounce-in {
+    0% {
+      transform: scale(0.4);
+      opacity: 0;
+    }
+    60% {
+      transform: scale(1.08);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  @keyframes shimmer {
+    0% {
+      background-position: -400px 0;
+    }
+    100% {
+      background-position: 400px 0;
+    }
+  }
+  @keyframes flame {
+    0%,
+    100% {
+      transform: scale(1) rotate(-2deg);
+    }
+    50% {
+      transform: scale(1.08) rotate(2deg);
+    }
+  }
+  @keyframes progress-stripes {
+    from {
+      background-position: 0 0;
+    }
+    to {
+      background-position: 32px 0;
+    }
+  }
+}
+
+/* ---------- Asosiy qatlam ---------- */
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+/* Fokus ko'rinishi — klaviatura navigatsiyasi uchun */
+:focus-visible {
+  outline: 3px solid var(--color-accent-blue);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* ---------- Komponent yordamchilari ---------- */
+
+/* Ko'tarilgan "3D" tugma — bosilganda pasayadi */
+.btn-3d {
+  position: relative;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  transition: transform 0.08s ease, filter 0.15s ease, box-shadow 0.08s ease;
+  cursor: pointer;
+  user-select: none;
+}
+.btn-3d:active:not(:disabled) {
+  transform: translateY(3px);
+}
+.btn-3d:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+/* Kartalar */
+.card {
+  background: #fff;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  box-shadow: 0 1px 2px rgb(16 24 40 / 0.04), 0 8px 24px -16px rgb(16 24 40 / 0.18);
+}
+
+/* Skeleton (yuklanish) */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-2) 25%,
+    #e7ecf5 37%,
+    var(--color-surface-2) 63%
+  );
+  background-size: 800px 100%;
+  animation: var(--animate-shimmer);
+  border-radius: 0.6rem;
+}
+
+/* Chiziqli progress (Duolingo-uslubidagi oq chiziqli emas — minimal) */
+.striped {
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgb(255 255 255 / 0.28) 0 8px,
+    transparent 8px 16px
+  );
+  animation: var(--animate-progress-stripes);
+}
+
+/* Skrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #c6cede transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: #c6cede;
+  border-radius: 999px;
+}
+
+/* Xavfsiz: harakatni kamaytirish afzalligi */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
