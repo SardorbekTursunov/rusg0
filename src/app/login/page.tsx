@@ -5,18 +5,26 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, LogIn, Mail, Lock } from "lucide-react";
+import { Loader2, LogIn, Mail, Lock, ShieldAlert } from "lucide-react";
 import { Logo } from "@/components/layout/logo";
 import { Button } from "@/components/ui/button";
 import { Input, Label, FieldError } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/components/providers/auth-provider";
 import { loginSchema, type LoginInput } from "@/lib/validations/auth";
+import {
+  checkLoginAllowed,
+  registerLoginFailure,
+  clearLoginFailures,
+  formatLockTime,
+} from "@/lib/auth/login-guard";
 
 export default function LoginPage() {
   const router = useRouter();
   const { status, signIn, demoMode } = useAuth();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [lockSeconds, setLockSeconds] = useState<number | null>(null);
+  const [attemptsLeft, setAttemptsLeft] = useState<number | null>(null);
 
   const {
     register,
@@ -28,13 +36,56 @@ export default function LoginPage() {
     if (status === "authenticated") router.replace("/dashboard");
   }, [status, router]);
 
-  const onSubmit = async (values: LoginInput) => {
-    setServerError(null);
-    const err = await signIn(values.email, values.password);
-    if (err) {
-      setServerError(err);
+  // Blok taymeri: har sekund sanaydi, nolga yetganda formani ochadi
+  useEffect(() => {
+    if (lockSeconds === null) return;
+    if (lockSeconds <= 0) {
+      setLockSeconds(null);
+      setServerError(null);
       return;
     }
+    const t = setTimeout(() => setLockSeconds((s) => (s === null ? null : s - 1)), 1000);
+    return () => clearTimeout(t);
+  }, [lockSeconds]);
+
+  const onSubmit = async (values: LoginInput) => {
+    setServerError(null);
+    setAttemptsLeft(null);
+
+    // 1) Blok tekshiruvi (server tomonda)
+    const check = await checkLoginAllowed(values.email);
+    if (!check.allowed) {
+      setLockSeconds(check.remainingSeconds);
+      setServerError(
+        `Ko‘p marta xato kiritildi. Hisobingiz vaqtincha bloklandi (${formatLockTime(check.remainingSeconds)}).`,
+      );
+      return;
+    }
+
+    // 2) Odatiy login
+    const err = await signIn(values.email, values.password);
+    if (err) {
+      // 3) Xato urinishni serverga yozamiz
+      await registerLoginFailure(values.email);
+      const after = await checkLoginAllowed(values.email);
+      if (!after.allowed) {
+        setLockSeconds(after.remainingSeconds);
+        setServerError(
+          `3 marta noto‘g‘ri parol kiritildi. Hisobingiz ${formatLockTime(after.remainingSeconds)} ga bloklandi.`,
+        );
+      } else {
+        setAttemptsLeft(after.attemptsLeft);
+        setServerError(
+          after.attemptsLeft > 0
+            ? `${err} Yana ${after.attemptsLeft} ta urinish qoldi.`
+            : err,
+        );
+      }
+      return;
+    }
+
+    // 4) Muvaffaqiyat — hisoblagichni tozalaymiz
+    await clearLoginFailures(values.email);
     router.replace("/dashboard");
   };
 
@@ -56,13 +107,28 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {serverError && (
+          {lockSeconds !== null ? (
             <div
               role="alert"
-              className="mb-4 rounded-xl border-l-4 border-error bg-error-soft px-4 py-3 text-sm font-semibold text-[#c62828]"
+              className="mb-4 flex items-start gap-3 rounded-xl border-l-4 border-error bg-error-soft px-4 py-3 text-sm font-semibold text-[#c62828]"
             >
-              {serverError}
+              <ShieldAlert size={18} className="mt-0.5 shrink-0" />
+              <span>
+                Ko‘p marta xato kiritildi. Hisobingiz vaqtincha bloklandi.
+                <span className="mt-1 block tabular-nums">
+                  Qayta urinish mumkin bo‘ladi: {formatLockTime(lockSeconds)}
+                </span>
+              </span>
             </div>
+          ) : (
+            serverError && (
+              <div
+                role="alert"
+                className="mb-4 rounded-xl border-l-4 border-error bg-error-soft px-4 py-3 text-sm font-semibold text-[#c62828]"
+              >
+                {serverError}
+              </div>
+            )
           )}
 
           <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
@@ -104,10 +170,19 @@ export default function LoginPage() {
               <FieldError message={errors.password?.message} />
             </div>
 
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+            <Button type="submit" className="w-full" disabled={isSubmitting || lockSeconds !== null}>
               {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : null}
-              Kirish
+              {lockSeconds !== null
+                ? `Bloklangan — ${formatLockTime(lockSeconds)}`
+                : "Kirish"}
             </Button>
+
+            {lockSeconds === null && attemptsLeft !== null && attemptsLeft > 0 && (
+              <p className="text-center text-xs font-semibold text-ink-soft">
+                Ehtiyot bo‘ling: yana {attemptsLeft} ta urinish qoldi, undan keyin hisob 10
+                daqiqaga bloklanadi.
+              </p>
+            )}
           </form>
 
           {demoMode && (
