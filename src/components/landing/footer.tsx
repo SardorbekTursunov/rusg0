@@ -7,7 +7,6 @@ const columns = [
     links: [
       { href: "/#kurslar", label: "Kurslar" },
       { href: "/#qanday-ishlaydi", label: "Qanday ishlaydi?" },
-      { href: "/#biz-haqimizda", label: "Biz haqimizda" },
       { href: "/register", label: "Ro‘yxatdan o‘tish" },
     ],
   },

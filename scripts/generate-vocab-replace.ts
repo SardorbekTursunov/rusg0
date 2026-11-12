@@ -138,9 +138,6 @@ const EXPRESSIONS = new Set([
 function q(s: string): string {
   return `'${s.replace(/'/g, "''")}'`;
 }
-function qs(s: string | null | undefined): string {
-  return s == null ? "null" : q(s);
-}
 function textArray(a: string[]): string {
   if (a.length === 0) return "'{}'";
   return `array[${a.map(q).join(", ")}]`;

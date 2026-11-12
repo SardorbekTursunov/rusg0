@@ -11,7 +11,6 @@ import { cn } from "@/lib/utils";
 const links = [
   { href: "/#kurslar", label: "Kurslar" },
   { href: "/#qanday-ishlaydi", label: "Qanday ishlaydi?" },
-  { href: "/#biz-haqimizda", label: "Biz haqimizda" },
 ];
 
 export function Navbar() {

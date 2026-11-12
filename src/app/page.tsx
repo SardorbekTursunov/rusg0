@@ -1,6 +1,6 @@
 import { Navbar } from "@/components/landing/navbar";
 import { Hero } from "@/components/landing/hero";
-import { Features, PathPreview, HowItWorks, Testimonials } from "@/components/landing/sections";
+import { Features, PathPreview, HowItWorks } from "@/components/landing/sections";
 import { Footer } from "@/components/landing/footer";
 
 export default function LandingPage() {
@@ -12,7 +12,6 @@ export default function LandingPage() {
         <Features />
         <PathPreview />
         <HowItWorks />
-        <Testimonials />
       </main>
       <Footer />
     </div>

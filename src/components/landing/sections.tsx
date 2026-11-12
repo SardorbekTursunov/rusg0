@@ -10,8 +10,6 @@ import {
   Check,
   PlayCircle,
   Trophy,
-  Quote,
-  Star,
 } from "lucide-react";
 
 const fade = {
@@ -225,78 +223,6 @@ export function HowItWorks() {
             </p>
           </motion.div>
         ))}
-      </div>
-    </section>
-  );
-}
-
-// --------------------------------------------------------------------------
-// Fikrlar (namuna kontent — aniq ko‘rsatilgan)
-// --------------------------------------------------------------------------
-
-const testimonials = [
-  {
-    name: "Aziza K.",
-    role: "8-sinf o‘quvchisi",
-    text: "Darslar juda qiziqarli. O‘zbekcha tushuntirishlar tufayli grammatikani birinchi marta tushundim!",
-    avatar: "🦊",
-  },
-  {
-    name: "Jasur E.",
-    role: "Talaba",
-    text: "Har kuni 10 daqiqa qilaman, bir oyda 300+ XP to‘pladim. Streak ushlab turish juda motivatsiya beradi.",
-    avatar: "🐯",
-  },
-  {
-    name: "Malika T.",
-    role: "O‘qituvchi yordamchisi",
-    text: "Tinglash mashqlari ajoyib — rus tilini eshitib o‘rganish juda oson bo‘ldi.",
-    avatar: "🦄",
-  },
-];
-
-export function Testimonials() {
-  return (
-    <section id="biz-haqimizda" className="bg-white py-16 lg:py-24">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <motion.div {...fade} className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">
-            O‘quvchilarimiz fikri
-          </h2>
-          <p className="mt-3 inline-block rounded-full bg-surface-2 px-3 py-1 text-xs font-bold text-ink-soft">
-            Namuna (demo) ma’lumotlar
-          </p>
-        </motion.div>
-
-        <div className="mt-12 grid gap-5 md:grid-cols-3">
-          {testimonials.map((t, i) => (
-            <motion.figure
-              key={t.name}
-              {...fade}
-              transition={{ duration: 0.45, delay: i * 0.08 }}
-              className="card flex flex-col p-6"
-            >
-              <Quote size={22} className="text-primary" />
-              <blockquote className="mt-3 flex-1 text-sm leading-relaxed text-ink-soft">
-                “{t.text}”
-              </blockquote>
-              <figcaption className="mt-5 flex items-center gap-3 border-t border-line pt-4">
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-surface text-lg">
-                  {t.avatar}
-                </span>
-                <div>
-                  <p className="text-sm font-bold text-ink">{t.name}</p>
-                  <p className="text-xs text-ink-soft">{t.role}</p>
-                </div>
-                <span className="ml-auto flex gap-0.5" aria-label="5 yulduz">
-                  {Array.from({ length: 5 }).map((_, s) => (
-                    <Star key={s} size={13} className="fill-accent-yellow text-accent-yellow" />
-                  ))}
-                </span>
-              </figcaption>
-            </motion.figure>
-          ))}
-        </div>
       </div>
     </section>
   );
