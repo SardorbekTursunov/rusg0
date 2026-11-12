@@ -145,7 +145,15 @@ export default function LoginPage() {
                   autoComplete="email"
                   placeholder="ism@example.com"
                   className="pl-10"
-                  {...register("email")}
+                  {...register("email", {
+                    onChange: () => {
+                      // Foydalanuvchi boshqa email bilan urinmoqchi — lokal blokni bekor qilamiz
+                      // (server tomondan tekshiruv baribir qayta ishlaydi)
+                      setLockSeconds(null);
+                      setAttemptsLeft(null);
+                      setServerError(null);
+                    },
+                  })}
                 />
               </div>
               <FieldError message={errors.email?.message} />
