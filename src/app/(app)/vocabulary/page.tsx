@@ -14,9 +14,14 @@ import {
   X,
   Loader2,
   Filter,
+  Play,
+  Pause,
+  Square,
+  AudioLines,
 } from "lucide-react";
 import { useStoreData } from "@/hooks/use-store-data";
 import { useSpeech } from "@/hooks/use-speech";
+import { useVocabPlayer } from "@/hooks/use-vocab-player";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -64,6 +69,7 @@ function Highlight({ text, query }: { text: string; query: string }) {
 export default function VocabularyPage() {
   const { toast } = useToast();
   const { speak, speaking, ttsSupported } = useSpeech();
+  const player = useVocabPlayer();
 
   const [searchInput, setSearchInput] = useState("");
   const [query, setQuery] = useState("");
@@ -151,6 +157,34 @@ export default function VocabularyPage() {
   );
 
   const totalPages = data ? Math.max(1, Math.ceil(data.result.total / data.result.pageSize)) : 1;
+
+  // "Tinglash" rejimi: ro'yxat o'zgarsa (filtr/sahifa almasansa) o'ynatish to'xtaydi
+  const items = useMemo(() => data?.result.items ?? [], [data]);
+  const idsKey = useMemo(() => items.map((v) => v.id).join(","), [items]);
+  const { stopIfListChanged } = player;
+  useEffect(() => {
+    stopIfListChanged(idsKey);
+  }, [idsKey, stopIfListChanged]);
+
+  // Hozir o'qilayotgan kartochkani ekranning o'rtasiga siljitish
+  const { playing: playerPlaying, currentId: playerCurrentId } = player;
+  useEffect(() => {
+    if (!playerPlaying || !playerCurrentId) return;
+    document
+      .querySelector(`[data-vocab-id="${playerCurrentId}"]`)
+      ?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [playerPlaying, playerCurrentId]);
+
+  function startPlayback() {
+    if (items.length === 0) return;
+    player.play(
+      items.map((v) => ({
+        id: v.id,
+        russianWord: v.russianWord,
+        uzbekTranslation: v.uzbekTranslation,
+      })),
+    );
+  }
 
   const learnedCount = useMemo(
     () => (data ? Object.values(data.states).filter((s) => s.isLearned).length : 0),
@@ -416,6 +450,79 @@ export default function VocabularyPage() {
         </Card>
       )}
 
+      {/* Tinglash rejimi — ro'yxatni ketma-ket ovozli o'qish */}
+      {(data?.result.items.length ?? 0) > 0 && (
+        <Card
+          className={cn(
+            "flex flex-wrap items-center gap-2 p-3",
+            player.playing && "border-primary bg-primary-soft",
+          )}
+        >
+          {!player.playing ? (
+            <Button
+              type="button"
+              onClick={startPlayback}
+              disabled={!player.ttsSupported}
+              className="h-10 rounded-full px-4"
+              aria-label="Ro‘yxatni ovozli tinglash"
+            >
+              <Play size={16} /> Tinglash ({data?.result.items.length ?? 0} ta)
+            </Button>
+          ) : (
+            <>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={player.paused ? player.resume : player.pause}
+                className="h-10 rounded-full px-4"
+                aria-label={player.paused ? "Davom etish" : "Pauza"}
+              >
+                {player.paused ? <Play size={16} /> : <Pause size={16} />}
+                {player.paused ? "Davom etish" : "Pauza"}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={player.stop}
+                className="h-10 rounded-full px-3"
+                aria-label="To‘xtatish"
+                title="To‘xtatish"
+              >
+                <Square size={14} />
+              </Button>
+            </>
+          )}
+
+          {player.playing ? (
+            <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+              <span className="rounded-full bg-primary px-2.5 py-1 text-xs font-extrabold text-white">
+                {player.index} / {player.total}
+              </span>
+              <span
+                className={cn(
+                  "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold",
+                  player.phase === "ru"
+                    ? "bg-accent-blue-soft text-accent-blue"
+                    : "bg-primary-soft text-primary-ink",
+                )}
+              >
+                <AudioLines size={13} />
+                {player.phase === "ru" ? "ruscha" : player.phase === "uz" ? "o‘zbekcha" : "…"}
+              </span>
+              <span className="text-xs text-ink-faint">
+                {player.paused ? "Pauzada" : "Ruscha → o‘zbekcha ketma-ket o‘qilmoqda"}
+              </span>
+            </div>
+          ) : (
+            <span className="text-xs font-semibold text-ink-faint">
+              {player.ttsSupported
+                ? "Ro‘yxatni ruscha → o‘zbekcha ketma-ket eshiting"
+                : "Bu brauzerda ovozli o‘qish mavjud emas"}
+            </span>
+          )}
+        </Card>
+      )}
+
       {loading && !data ? (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           <ListSkeleton count={6} />
@@ -441,7 +548,16 @@ export default function VocabularyPage() {
             const isLearned = state?.isLearned ?? false;
             const expanded = expandedId === v.id;
             return (
-              <Card key={v.id} className="flex flex-col p-4">
+              <Card
+                key={v.id}
+                data-vocab-id={v.id}
+                className={cn(
+                  "flex flex-col p-4 transition-shadow",
+                  player.playing &&
+                    player.currentId === v.id &&
+                    "border-primary ring-2 ring-primary-soft",
+                )}
+              >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5">
