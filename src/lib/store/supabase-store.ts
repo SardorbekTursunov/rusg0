@@ -29,6 +29,7 @@ import {
   STORE_ERRORS,
   SIGNUP_NEEDS_CONFIRMATION,
   type AppStore,
+  type AdminUserRow,
   type CompleteLessonInput,
   type CompleteLessonResult,
   type DailyQuestState,
@@ -1038,6 +1039,48 @@ export function createSupabaseStore(): AppStore {
       if (!id) return false;
       const { data } = await sb().from("profiles").select("role").eq("id", id).single();
       return data?.role === "admin";
+    },
+
+    async adminListUsers(): Promise<AdminUserRow[]> {
+      const { data, error } = await sb().rpc("admin_list_users", { p_limit: 500 });
+      if (error) throw new Error(error.message);
+      return ((data ?? []) as Row[]).map((r) => ({
+        userId: String(r.user_id),
+        username: String(r.username ?? ""),
+        fullName: String(r.full_name ?? ""),
+        email: String(r.email ?? ""),
+        role: r.role === "admin" ? "admin" : "user",
+        totalXp: Number(r.total_xp ?? 0),
+        currentStreak: Number(r.current_streak ?? 0),
+        createdAt: String(r.created_at ?? ""),
+      }));
+    },
+
+    async adminSetRole(userId, role) {
+      const { error } = await sb().rpc("admin_set_role", {
+        p_user_id: userId,
+        p_role: role,
+      });
+      if (error) return error.message;
+      return null;
+    },
+
+    async adminGrantAchievement(userId, achievementId) {
+      const { error } = await sb().rpc("admin_grant_achievement", {
+        p_user_id: userId,
+        p_achievement_id: achievementId,
+      });
+      if (error) return error.message;
+      return null;
+    },
+
+    async adminResetPassword(userId, newPassword) {
+      const { error } = await sb().rpc("admin_reset_password", {
+        p_user_id: userId,
+        p_new_password: newPassword,
+      });
+      if (error) return error.message;
+      return null;
     },
 
     async adminSaveLesson(lesson) {

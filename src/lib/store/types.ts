@@ -74,6 +74,18 @@ export interface AdminStats {
   modulesCount: number;
 }
 
+/** Admin: userlar ro'yxatidagi bir qator */
+export interface AdminUserRow {
+  userId: string;
+  username: string;
+  fullName: string;
+  email: string;
+  role: "user" | "admin";
+  totalXp: number;
+  currentStreak: number;
+  createdAt: string;
+}
+
 export interface ReviewQueueItem {
   item: VocabularyItem;
   state: UserVocabState;
@@ -226,6 +238,10 @@ export interface AppStore {
   adminSaveVocabulary(item: VocabularyItem): Promise<string | null>;
   adminDeleteVocabulary(id: string): Promise<string | null>;
   adminIsAdmin(): Promise<boolean>;
+  adminListUsers(): Promise<AdminUserRow[]>;
+  adminSetRole(userId: string, role: "user" | "admin"): Promise<string | null>;
+  adminGrantAchievement(userId: string, achievementId: string): Promise<string | null>;
+  adminResetPassword(userId: string, newPassword: string): Promise<string | null>;
 }
 
 /** Xato xabarlari — o'zbek tilida */

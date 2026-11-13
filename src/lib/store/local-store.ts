@@ -38,6 +38,7 @@ import {
 import {
   STORE_ERRORS,
   type AppStore,
+  type AdminUserRow,
   type CompleteLessonInput,
   type CompleteLessonResult,
   type DailyQuestState,
@@ -1373,6 +1374,67 @@ export function createLocalStore(): AppStore {
       const db = loadDb();
       if (!db) return false;
       return currentAccount(db)?.profile.role === "admin";
+    },
+
+    async adminListUsers(): Promise<AdminUserRow[]> {
+      const db = loadDb();
+      if (!db) return [];
+      const me = currentAccount(db);
+      if (!me || me.profile.role !== "admin") throw new Error("Ruxsat yo'q.");
+      return db.accounts.map((a) => ({
+        userId: a.id,
+        username: a.profile.username,
+        fullName: a.profile.fullName,
+        email: a.email,
+        role: a.profile.role,
+        totalXp: a.profile.totalXp,
+        currentStreak: a.profile.currentStreak,
+        createdAt: a.createdAt,
+      }));
+    },
+
+    async adminSetRole(userId, role) {
+      const db = loadDb();
+      if (!db) return STORE_ERRORS.noSession;
+      const acc = currentAccount(db);
+      if (!acc || acc.profile.role !== "admin") return "Ruxsat yo'q.";
+      if (acc.id === userId) return "O'z rolingizni o'zgartira olmaysiz.";
+      const target = db.accounts.find((a) => a.id === userId);
+      if (!target) return STORE_ERRORS.notFound;
+      target.profile.role = role;
+      saveDb(db);
+      return null;
+    },
+
+    async adminGrantAchievement(userId, achievementId) {
+      const db = loadDb();
+      if (!db) return STORE_ERRORS.noSession;
+      const acc = currentAccount(db);
+      if (!acc || acc.profile.role !== "admin") return "Ruxsat yo'q.";
+      const target = db.accounts.find((a) => a.id === userId);
+      if (!target) return STORE_ERRORS.notFound;
+      if (!target.state.achievements) target.state.achievements = {};
+      if (target.state.achievements[achievementId]) return null;
+      const { achievements } = await import("@/data/achievements");
+      const ach = achievements.find((a) => a.id === achievementId);
+      if (!ach) return STORE_ERRORS.notFound;
+      target.state.achievements[achievementId] = new Date().toISOString();
+      addXp(target, ach.xpReward, "achievement", `Yutuq: ${ach.title}`);
+      saveDb(db);
+      return null;
+    },
+
+    async adminResetPassword(userId, newPassword) {
+      const db = loadDb();
+      if (!db) return STORE_ERRORS.noSession;
+      const acc = currentAccount(db);
+      if (!acc || acc.profile.role !== "admin") return "Ruxsat yo'q.";
+      if (newPassword.length < 6) return STORE_ERRORS.weakPassword;
+      const target = db.accounts.find((a) => a.id === userId);
+      if (!target) return STORE_ERRORS.notFound;
+      target.password = newPassword;
+      saveDb(db);
+      return null;
     },
 
     async adminSaveLesson(lesson) {

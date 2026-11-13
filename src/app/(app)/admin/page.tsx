@@ -206,6 +206,25 @@ export default function AdminOverviewPage() {
         </p>
       </section>
 
+      <section>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <CardTitle className="flex items-center gap-2">
+            <Users size={18} className="text-accent-blue" /> Foydalanuvchilarni boshqarish
+          </CardTitle>
+          <Link href="/admin/users">
+            <Button variant="secondary" className="h-9 rounded-full px-3 text-xs">
+              Ro&apos;yxatni ko&apos;rish
+            </Button>
+          </Link>
+        </div>
+        <Card className="p-4">
+          <p className="text-sm text-ink-soft">
+            Userlar ro&apos;yxati (email, XP, streak), admin qilish/olish, yutuq berish va
+            parolni yangilash. Parollar hash holda saqlanadi — ko&apos;rsatish mumkin emas.
+          </p>
+        </Card>
+      </section>
+
       <Card className="bg-accent-yellow-soft">
         <CardTitle className="mb-2 text-[#8a6d00]">Xavfsizlik eslatmasi</CardTitle>
         <p className="text-sm leading-relaxed text-[#8a6d00]">
