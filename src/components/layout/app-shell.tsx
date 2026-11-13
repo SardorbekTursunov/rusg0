@@ -7,6 +7,7 @@ import {
   Home,
   Map,
   BookOpen,
+  Gamepad2,
   RotateCcw,
   Trophy,
   Award,
@@ -27,6 +28,7 @@ import { cn, formatNumber } from "@/lib/utils";
 const nav = [
   { href: "/dashboard", label: "Bosh sahifa", icon: Home },
   { href: "/learn", label: "O‘rganish", icon: Map },
+  { href: "/games", label: "O‘yinlar", icon: Gamepad2 },
   { href: "/vocabulary", label: "Lug‘at", icon: BookOpen },
   { href: "/review", label: "Takrorlash", icon: RotateCcw },
   { href: "/leaderboard", label: "Reyting", icon: Trophy },

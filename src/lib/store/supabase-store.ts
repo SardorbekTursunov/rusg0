@@ -32,6 +32,8 @@ import {
   type CompleteLessonInput,
   type CompleteLessonResult,
   type DailyQuestState,
+  type GameResult,
+  type GameSlug,
   type ProfilePatch,
   type ReviewQueue,
   type ReviewWordResult,
@@ -700,6 +702,22 @@ export function createSupabaseStore(): AppStore {
         alreadyCompleted: Boolean(row.already_completed),
         newAchievements,
         quests: await this.getDailyQuests(),
+        totalXp: Number(row.total_xp ?? 0),
+        currentStreak: Number(row.current_streak ?? 0),
+      };
+    },
+
+    async recordGameResult(game: GameSlug, correct: number, total: number): Promise<GameResult> {
+      const { data, error } = await sb().rpc("record_game_result", {
+        p_game: game,
+        p_correct: correct,
+        p_total: total,
+      });
+      if (error) throw new Error(error.message);
+      const row = (data ?? {}) as Row;
+      return {
+        xpAwarded: Number(row.xp_awarded ?? 0),
+        capReached: Boolean(row.cap_reached),
         totalXp: Number(row.total_xp ?? 0),
         currentStreak: Number(row.current_streak ?? 0),
       };

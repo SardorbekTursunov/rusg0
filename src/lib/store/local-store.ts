@@ -41,6 +41,8 @@ import {
   type CompleteLessonInput,
   type CompleteLessonResult,
   type DailyQuestState,
+  type GameResult,
+  type GameSlug,
   type ProfilePatch,
   type ReviewQueue,
   type ReviewWordResult,
@@ -297,6 +299,16 @@ function saveDb(db: LocalDb): void {
 function currentAccount(db: LocalDb): LocalAccount | null {
   if (!db.sessionId) return null;
   return db.accounts.find((a) => a.id === db.sessionId) ?? null;
+}
+
+function gameLabel(game: GameSlug): string {
+  switch (game) {
+    case "quiz": return "Quiz rush";
+    case "memory": return "Juftlash";
+    case "truefalse": return "To'g'ri/Xato";
+    case "listen": return "Tingla va top";
+    case "letters": return "Harflarni yig'";
+  }
 }
 
 function addXp(acc: LocalAccount, amount: number, source: XpEvent["source"], label: string): void {
@@ -1045,6 +1057,34 @@ export function createLocalStore(): AppStore {
         alreadyCompleted,
         newAchievements,
         quests: await this.getDailyQuests(),
+        totalXp: acc.profile.totalXp,
+        currentStreak: acc.profile.currentStreak,
+      };
+    },
+
+    async recordGameResult(game: GameSlug, correct: number, total: number): Promise<GameResult> {
+      const db = loadDb();
+      if (!db) throw new Error(STORE_ERRORS.noSession);
+      const acc = currentAccount(db);
+      if (!acc) throw new Error(STORE_ERRORS.noSession);
+
+      // Demo rejim: 1 to'g'ri = 1 XP, kunlik cap 30 XP (Supabase bilan bir xil)
+      const cap = 30;
+      const todayIso = todayKey();
+      const todayGameXp = acc.state.xpEvents
+        .filter((e) => e.source === "game" && String(e.createdAt).slice(0, 10) === todayIso)
+        .reduce((s, e) => s + e.amount, 0);
+
+      let xp = total > 0 ? Math.max(Math.min(correct, total), 0) : 0;
+      if (total >= 5 && correct === total) xp += 2;
+      xp = Math.min(xp, Math.max(cap - todayGameXp, 0));
+
+      if (xp > 0) addXp(acc, xp, "game", `O'yin: ${gameLabel(game)}`);
+      saveDb(db);
+
+      return {
+        xpAwarded: xp,
+        capReached: todayGameXp >= cap,
         totalXp: acc.profile.totalXp,
         currentStreak: acc.profile.currentStreak,
       };

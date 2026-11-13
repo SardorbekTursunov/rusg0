@@ -312,7 +312,7 @@ export interface UserVocabState {
 export interface XpEvent {
   id: string;
   amount: number;
-  source: "lesson" | "perfect_bonus" | "quest" | "review" | "achievement";
+  source: "lesson" | "perfect_bonus" | "quest" | "review" | "achievement" | "game";
   label: string; // o'zbekcha ko'rsatish uchun
   createdAt: string; // ISO
 }

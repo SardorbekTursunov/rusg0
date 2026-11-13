@@ -52,6 +52,17 @@ export interface ReviewWordResult {
   xpAwarded: number; // sessiya davomida +5 XP (1 marta)
 }
 
+/** O'yin yakuni natijasi (record_game_result) */
+export interface GameResult {
+  xpAwarded: number;
+  /** Kunlik 30 XP chekloviga yetilgani */
+  capReached: boolean;
+  totalXp: number;
+  currentStreak: number;
+}
+
+export type GameSlug = "quiz" | "memory" | "truefalse" | "listen" | "letters";
+
 export interface AdminStats {
   totalUsers: number;
   activeUsers: number;
@@ -180,6 +191,7 @@ export interface AppStore {
   // ---- Progress --------------------------------------------------------
   getLessonProgress(): Promise<LessonProgress[]>;
   completeLesson(input: CompleteLessonInput): Promise<CompleteLessonResult>;
+  recordGameResult(game: GameSlug, correct: number, total: number): Promise<GameResult>;
   getXpEvents(limit?: number): Promise<XpEvent[]>;
 
   // ---- Kunlik vazifalar ------------------------------------------------
