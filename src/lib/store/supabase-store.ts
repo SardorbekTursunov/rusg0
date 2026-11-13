@@ -27,6 +27,7 @@ import { categoryTitleUz } from "@/data/vocabulary/categories";
 import { normalizeImportRow, vocabKey } from "@/lib/content-import";
 import {
   STORE_ERRORS,
+  SIGNUP_NEEDS_CONFIRMATION,
   type AppStore,
   type CompleteLessonInput,
   type CompleteLessonResult,
@@ -209,7 +210,7 @@ export function createSupabaseStore(): AppStore {
         .select("id")
         .ilike("username", username.trim());
       if (taken && taken.length > 0) return STORE_ERRORS.usernameTaken;
-      const { error } = await sbc.auth.signUp({
+      const { data, error } = await sbc.auth.signUp({
         email: email.trim().toLowerCase(),
         password,
         options: { data: { username: username.trim(), full_name: fullName.trim() } },
@@ -218,6 +219,9 @@ export function createSupabaseStore(): AppStore {
         if (error.message.toLowerCase().includes("already")) return STORE_ERRORS.emailInUse;
         return error.message;
       }
+      // Email tasdiqlash yoqilgan bo'lsa: user yaratildi, lekin sessiya YO'Q
+      // → foydalanuvchi pochtadagi kod bilan tasdiqlashi kerak (/verify)
+      if (data.user && !data.session) return SIGNUP_NEEDS_CONFIRMATION;
       return null;
     },
 
@@ -226,7 +230,11 @@ export function createSupabaseStore(): AppStore {
         email: email.trim().toLowerCase(),
         password,
       });
-      if (error) return STORE_ERRORS.invalidLogin;
+      if (error) {
+        if (error.message.toLowerCase().includes("not confirmed"))
+          return STORE_ERRORS.emailNotConfirmed;
+        return STORE_ERRORS.invalidLogin;
+      }
       return null;
     },
 

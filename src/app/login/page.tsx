@@ -127,6 +127,14 @@ export default function LoginPage() {
                 className="mb-4 rounded-xl border-l-4 border-error bg-error-soft px-4 py-3 text-sm font-semibold text-[#c62828]"
               >
                 {serverError}
+                {serverError.includes("tasdiqlanmagan") && (
+                  <Link
+                    href="/verify"
+                    className="mt-1 block font-bold underline hover:no-underline"
+                  >
+                    Emailni tasdiqlash →
+                  </Link>
+                )}
               </div>
             )
           )}

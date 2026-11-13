@@ -12,6 +12,7 @@ import { Input, Label, FieldError } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/components/providers/auth-provider";
 import { registerSchema, type RegisterInput } from "@/lib/validations/auth";
+import { SIGNUP_NEEDS_CONFIRMATION } from "@/lib/store/types";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -36,6 +37,10 @@ export default function RegisterPage() {
       username: values.username,
       fullName: values.fullName,
     });
+    if (err === SIGNUP_NEEDS_CONFIRMATION) {
+      router.replace(`/verify?email=${encodeURIComponent(values.email.trim())}`);
+      return;
+    }
     if (err) {
       setServerError(err);
       return;

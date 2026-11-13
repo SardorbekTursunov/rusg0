@@ -226,4 +226,8 @@ export const STORE_ERRORS = {
   usernameTaken: "Bu username allaqachon band.",
   usernameShort: "Username kamida 3 ta belgidan iborat bo‘lsin.",
   xpDedup: "Bu dars uchun XP allaqachon berilgan.",
+  emailNotConfirmed: "Emailingiz hali tasdiqlanmagan. Pochtangizga kelgan kod bilan tasdiqlang.",
 } as const;
+
+/** signUp natijasi: sessiya ochilmadi → email tasdiqlash talab qilinadi (qarang /verify) */
+export const SIGNUP_NEEDS_CONFIRMATION = "__signup_needs_confirmation__";
