@@ -31,6 +31,23 @@ export default function RegisterPage() {
 
   const onSubmit = async (values: RegisterInput) => {
     setServerError(null);
+
+    // 0) Email tez tekshiruvi (domain mavjudligi, vaqtinchalik pochtalar)
+    try {
+      const res = await fetch("/api/validate-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: values.email.trim() }),
+      });
+      const v = (await res.json()) as { ok: boolean; message?: string };
+      if (!v.ok) {
+        setServerError(v.message ?? "Emailni tekshiring.");
+        return;
+      }
+    } catch {
+      // API ishlamasa — tekshiruvsiz davom etamiz (kod baribir tekshiradi)
+    }
+
     const err = await signUp({
       email: values.email,
       password: values.password,
