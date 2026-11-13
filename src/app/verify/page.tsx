@@ -47,8 +47,8 @@ function VerifyForm() {
       setServerError("Avval emailingizni kiriting.");
       return;
     }
-    if (!/^\d{6}$/.test(code.trim())) {
-      setServerError("Kod 6 xonali raqam bo‘lishi kerak.");
+    if (!/^\d{6,8}$/.test(code.trim())) {
+      setServerError("Kod noto‘g‘ri. Pochtadagi kodni to‘liq kiriting.");
       return;
     }
     const err = await verifySignupCode(email, code);
@@ -88,7 +88,7 @@ function VerifyForm() {
         </span>
         <h1 className="text-2xl font-extrabold text-ink">Emailni tasdiqlang</h1>
         <p className="mt-1.5 text-sm text-ink-soft">
-          Pochtangizga yuborilgan <strong>6 xonali kod</strong>ni kiriting
+          Pochtangizga yuborilgan <strong>tasdiqlash kodi</strong>ni kiriting
         </p>
       </div>
 
@@ -127,10 +127,10 @@ function VerifyForm() {
             inputMode="numeric"
             autoComplete="one-time-code"
             placeholder="••••••"
-            maxLength={6}
-            className="text-center text-2xl font-extrabold tracking-[0.5em]"
+            maxLength={8}
+            className="text-center text-2xl font-extrabold tracking-[0.4em]"
             value={code}
-            onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+            onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 8))}
             onKeyDown={(e) => {
               if (e.key === "Enter") void onVerify();
             }}
